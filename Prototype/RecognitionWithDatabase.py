@@ -15,6 +15,7 @@ def recognize(detected_faces):
 
     #recognition by comparing with embeddings of known faces
     count=0
+    present=[]
     for target_embedding in target_embeddings:
         newquery = mycollection.aggregate( [
     {
@@ -26,6 +27,7 @@ def recognize(detected_faces):
     , {"$unwind" : { "path" : "$target_embedding", "includeArrayIndex": "target_embedding_index" }}
     , {
         "$project": {
+            
             "img_name": 1,
             "embedding": 1,
             "target_embedding": 1,
@@ -67,6 +69,10 @@ def recognize(detected_faces):
         match=list(newquery)
         if len(match)>0:
             print(count," ",match[0]['_id'])
+            if match[0]['_id'] not in present:
+                present.append(match[0]['_id'])
         else:
+            
             print(count," no matches")
         count+=1
+    return present
