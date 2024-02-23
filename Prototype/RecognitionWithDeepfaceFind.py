@@ -5,7 +5,7 @@ def recognize(detected_faces):
     res=[]
 
     for i in range(len(detected_faces)):
-        model=df.find(img_path=detected_faces[i],db_path='Data/known_faces',model_name="Facenet",distance_metric="euclidean",enforce_detection=False,normalization="Facenet")
+        model=df.find(img_path=detected_faces[i],db_path='Data/known_faces',model_name="Facenet",distance_metric="euclidean",enforce_detection=False,detector_backend='mediapipe',normalization="Facenet")
         models.append(model)
 
 

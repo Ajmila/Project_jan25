@@ -1,32 +1,26 @@
-from deepface import DeepFace as df
-import pandas as pd
-from deepface.commons import functions
-from tqdm import tqdm
-import ConnectDatabase
-import KnownfacesPath
-
-def store_student_data():
-    client=ConnectDatabase.connect_db()
-
-    mydb=client['Student']
-    mycollection=mydb['stud_table']
+# Function to import data from CSV to MongoDB
+def import_csv_to_mongodb(csv_file, collection):
+    # Read CSV file into a pandas DataFrame
+    data = pd.read_csv(csv_file)
     
 
-    instances = []
-    img_paths=KnownfacesPath.find_img_path()
     
-    #find embeddings of known_faces
-    for i in tqdm(range(0, len(img_paths))):
-        facial_img_path = img_paths[i]    
-        embedding = df.represent(img_path = facial_img_path, model_name = "Facenet",enforce_detection=False)[0]["embedding"]
-
-        instance = []
-        instance.append(facial_img_path)
-        instance.append(embedding)
-        instances.append(instance)
-
-    dframe = pd.DataFrame(instances, columns = ["img_name", "embedding"])
     
-    #insert_query
-    for index, instance in tqdm(dframe.iterrows(), total = dframe.shape[0]):
-        mydb['stud_table'].insert_one({"img_name": instance["img_name"], "embedding" : instance["embedding"]})
+    # Convert DataFrame to dictionary
+    data_dict = data.to_dict(orient='records')
+    
+    # Insert data into MongoDB collection
+    collection.insert_many(data_dict)
+    
+   
+    
+    print("Data imported successfully into MongoDB.")
+
+# Example usage
+if __name__ == "__main__":
+    csv_file = 'Data/names.csv'  # Path to your CSV file
+    collection_name = student_collection  # Name of the MongoDB collection
+    
+    
+    import_csv_to_mongodb(csv_file, collection_name)
+

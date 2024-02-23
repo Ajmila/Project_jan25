@@ -1,20 +1,25 @@
-from retinaface import RetinaFace as rf
+import mediapipe as mp
 import cv2
 
 def detect_faces(frames):
   
     detected_faces = []
+    img=frames[0]
+    mp_face_detction = mp.solutions.face_detection
+    for frame in frames:
+        with mp_face_detction.FaceDetection(model_selection = 1, min_detection_confidence = 0.5) as face_detection:
+            results = face_detection.process(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
+            for detection in results.detections:
+                box = detection.location_data.relative_bounding_box
+                x_start, y_start = int(box.xmin * img.shape[1]), int(box.ymin * img.shape[0])
+                x_end, y_end = int((box.xmin + box.width) * img.shape[1]), int((box.ymin + box.height) * img.shape[0])
 
-    for frame in frames[:3]:
-        obj = rf.detect_faces(frame)
-        if isinstance(obj, dict):
-            for key in obj.keys():
-                faceid = obj[key]
-                area = faceid['facial_area']
-                x1,y1,x2,y2=area
-                extracted_face=frame[y1:y2,x1:x2]
-                extracted_face=cv2.cvtColor(extracted_face,cv2.COLOR_BGR2RGB)
-                detected_faces.append(extracted_face)
+                if x_start < 0 or y_start < 0:
+                    continue
+
+            face = frame[y_start:y_end, x_start:x_end]
+            face = cv2.cvtColor(face,cv2.COLOR_BGR2RGB)
+            detected_faces.append(face)
     return detected_faces
 
 
